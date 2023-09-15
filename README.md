@@ -1,6 +1,6 @@
-# Monitoring Kualitas Udara dengan ESP32
+# Monitoring Kualitas Udara dengan ESP32 + DSM501a + DHT22
 
-![ESP32](https://github.com/yourusername/yourproject/raw/master/images/esp32.jpg)
+![ESP32](https://github.com/Anemo27/Sistem_Monitoring_Udara/raw/master/images/esp32.jpg)
 
 ## Deskripsi Proyek
 Proyek ini adalah sistem pemantauan kualitas udara menggunakan mikrokontroler ESP32. Proyek ini mengukur berbagai parameter seperti suhu, kelembaban, konsentrasi karbon monoksida (CO), dan partikel PM2.5 dalam udara. Ketika kualitas udara tidak baik, sistem akan memberikan notifikasi ke Telegram.
@@ -31,5 +31,5 @@ Kami sangat menghargai kontribusi dari komunitas. Jika Anda ingin berkontribusi 
 Proyek ini dilisensikan di bawah [Lisensi MIT](LICENSE).
 
 ## Penulis
-Dibuat oleh [Nama Anda](https://github.com/yourusername)
+Dibuat oleh [ANeMo](https://github.com/Anemo27)
 
