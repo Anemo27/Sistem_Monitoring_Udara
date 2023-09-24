@@ -12,21 +12,11 @@
 #define MQ_PIN 32
 
 // Constants
-#define DELAY_TIME 100
-#define AP_SSID "Monitoring Polusi"
-#define AP_PASSWORD "monitoringpolusi"
 #define DHT_TYPE DHT22
-#define BOARD "ESP-32"
-#define VOLTAGE_RESOLUTION 3.3
-#define ADC_BIT_RESOLUTION 12
-#define RATIO_CLEANAIR_MQ7 33.83
-#define DSM_LOW_RATIO_MULTIPLIER 30.0 / 1000.0
-#define DSM_INTERVAL 1000
-#define DSM_CONCENTRATION_A 1.1
-#define DSM_CONCENTRATION_B -3.8
-#define DSM_CONCENTRATION_C 520.0
-#define DSM_CONCENTRATION_D 0.62
-#define TS_INTERVAL 20000
+#define RATIO_CLEANAIR_MQ7 (27.5)
+#define DSM_LOW_RATIO_MULTIPLIER (30.0 / 1000.0)
+#define DSM_INTERVAL (1000)          // DSM501a interval pembacaan
+#define TS_INTERVAL (20000)          // ThingSpeak interval kirim data
 #define CHANNEL_ID_EEPROM_ADDR 0     // Alamat EEPROM untuk menyimpan Channel ID
 #define WRITE_API_KEY_EEPROM_ADDR 10 // Alamat EEPROM untuk menyimpan Write API Key
 
@@ -41,7 +31,8 @@ WiFiManagerParameter api_key_param;
 WiFiClient client;
 
 DHT dht(DHT_PIN, DHT_TYPE);
-MQUnifiedsensor MQ7(BOARD, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, MQ_PIN, "MQ-7");
+// MQUnifiedsensor MQ7(BOARD, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, MQ_PIN, "MQ-7");
+MQUnifiedsensor MQ7("ESP-32", 3.3, 12, MQ_PIN, "MQ-7");
 
 float mq7Value = 0;
 float humi = 0;
@@ -62,7 +53,19 @@ void setup()
   delay(3000);
   Serial.println("Starting");
 
-  // Setup WiFi Manager
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(TRIGGER_PIN, INPUT);
+
+  configureWiFiManager();
+  configureDHT();
+  configureMQ7();
+  configureDSM501a();
+  configureThingSpeak();
+}
+
+void configureWiFiManager()
+{
+  // Setup WiFi Manager di sini
   new (&channel_id_param) WiFiManagerParameter("channelid", "ThingSpeak Channel ID", channelID, 20);
   new (&api_key_param) WiFiManagerParameter("apikey", "ThingSpeak API Key", writeAPIKey, 40);
 
@@ -75,7 +78,7 @@ void setup()
   wm.setMenu(menu);
   wm.setClass("invert");
 
-  if (wm.autoConnect(AP_SSID, AP_PASSWORD))
+  if (wm.autoConnect())
   {
     Serial.println("Connected to WiFi");
   }
@@ -83,17 +86,21 @@ void setup()
   {
     Serial.println("Config portal running");
   }
+}
 
-  // Setup DHT22
+void configureDHT()
+{
+  // Setup DHT22 di sini
   dht.begin();
+}
 
-  // Setup ThingSpeak
-  ThingSpeak.begin(client);
-
-  // Setup MQ-7
-  MQ7.setRegressionMethod(1);
-  MQ7.setA(36974);
-  MQ7.setB(-3.109);
+void configureMQ7()
+{
+  // Setup MQ-7 di sini
+  // Set math model to calculate the PPM concentration and the value of constants
+  MQ7.setRegressionMethod(1); //_PPM =  a*ratio^b
+  MQ7.setA(99.042);           // Configure the equation to calculate CO concentration value
+  MQ7.setB(-1.518);           // Configure the equation to calculate CO concentration value
   MQ7.init();
 
   Serial.print("Calibrating sensor, please wait");
@@ -114,13 +121,19 @@ void setup()
     while (1)
       ;
   }
+}
 
-  // Setup DSM501a
+void configureDSM501a()
+{
+  // Setup DSM501a di sini
   pinMode(DSM_PIN, INPUT);
   dsm_previousTime = millis();
+}
 
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(TRIGGER_PIN, INPUT);
+void configureThingSpeak()
+{
+  // Setup ThingSpeak di sini
+  ThingSpeak.begin(client);
 }
 
 void saveToEEPROM()
@@ -160,7 +173,7 @@ float getParticlemgm3(float r)
 void loop()
 {
   digitalWrite(LED_PIN, HIGH);
-  delay(DELAY_TIME);
+  delay(100);
 
   int currentWiFiStatus = WiFi.status();
   static int lastWiFiStatus = WL_IDLE_STATUS;
@@ -170,7 +183,7 @@ void loop()
     if (currentWiFiStatus != WL_CONNECTED)
     {
       Serial.println("WiFi disconnected. Reconnecting...");
-      wm.startConfigPortal(AP_SSID, AP_PASSWORD);
+      wm.startConfigPortal("OnDemandAP");
     }
   }
 
@@ -183,9 +196,8 @@ void loop()
   if ((millis() - dsm_previousTime) > DSM_INTERVAL)
   {
     Serial.println("============================");
-    dsm_previousTime = millis();
     float lowRatio = (dsm_lowPulse * DSM_LOW_RATIO_MULTIPLIER) / DSM_INTERVAL;
-    dsm_consentrate = 1.1 * pow(lowRatio, 3) - 3.8 * pow(lowRatio, 2) + 520 * lowRatio + 0.62; // using spec sheet curve
+    dsm_consentrate = 1.1 * pow(lowRatio, 3) - 3.8 * pow(lowRatio, 2) + 520.0 * lowRatio + 0.62; // using spec sheet curve
     dsm_particle = getParticlemgm3(lowRatio);
 
     Serial.print("Air Quality         : ");
@@ -248,6 +260,7 @@ void loop()
       Serial.println("°F");
     }
 
+    dsm_previousTime = millis();
     Serial.println("============================");
   }
 
@@ -290,5 +303,5 @@ void loop()
   }
 
   digitalWrite(LED_PIN, LOW);
-  delay(DELAY_TIME);
+  delay(100);
 }

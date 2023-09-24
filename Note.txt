@@ -1,0 +1,48 @@
+1. Konfigurasi WiFi
+   library: WiFimanager by tzapu
+   link: https://github.com/tzapu/WiFiManager
+   set default value: SSID, Password
+
+2. Konfigurasi ThingSpeak
+   libary: ThingSpeak by MathWork
+   link: https://thingspeak.com/
+
+2. Konfigurasi SPIFFS
+   library: default Arduino
+   set config.json file: Token Thingspeak, APIKey Thingspeak, telegram bot, telegram ID.
+   set tempData.json file untuk data sensor.
+
+3. Konfigurasi DHT22
+   library: DHT Sensor Library by Adafruit
+   link: https://github.com/adafruit/DHT-sensor-library
+
+4. Konfigurasi MQ7
+   library: MQUnifiedsensor by Miguel Califa
+   link: https://github.com/miguel5612/MQSensorsLib
+
+5. Konfigurasi DSM501a
+
+   link pendukung: https://github.com/R2D2-2019/R2D2-2019/wiki/Is-the-given-formula-for-calculating-the-mg-m3-for-the-dust-sensor-dsm501a-correct%3F
+   link pendukung: https://forum.mysensors.org/topic/9497/dust-sensor-samyoung-dsm501a
+   link pendukung: https://github.com/fcgdam/ESP8266_AirQuality/blob/master/src/main.cpp
+   link pendukung: https://github.com/vinojv96/Air_Quality_Thingspeak
+   link pendukung: https://www.electroniclinic.com/dust-sensor-dsm501a-with-arduino-pm10-pm2-5-air-quality-monitoring/
+   link pendukung: https://www.hackster.io/mircemk/arduino-air-quality-monitor-with-dsm501a-sensor-b4f8fc
+   link pendukung: http://psenyukov.ru/%d0%b4%d0%b0%d1%82%d1%87%d0%b8%d0%ba-%d0%bf%d1%8b%d0%bb%d0%b8-dsm501a-%d0%bf%d0%be%d0%b4%d0%ba%d0%bb%d1%8e%d1%87%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b5%d0%b3%d0%be-%d0%ba-arduino-esp32-%d0%b8-%d0%be%d1%82/
+   link pendukung: https://www.youtube.com/watch?v=G2SQT_K1uOY
+
+6. TelegramBot
+   library: AsyncTelegram2
+   link: https://github.com/cotestatnt/asynctelegram2
+   TimeZone: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
+   bot: https://t.me/JsonDumpBot  or  https://t.me/getidsbot
+
+7. SNTP (Simple Network Time Protocol)
+   link: https://playground.arduino.cc/Code/Time/
+
+WiFimanager mode blocking. jadi, selama pengaturan wifi berlangsung, pembacaan sensor tidak berjalan/ditunda.
+
+Urutan Konfigurasi:
+- alat hidup
+- cek koneksi WiFi
+- cek koneksi NTP
