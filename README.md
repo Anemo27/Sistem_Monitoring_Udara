@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Monitoring Kualitas Udara dengan ESP32 + DSM501a + DHT22
 
 ![ESP32](https://github.com/Anemo27/Sistem_Monitoring_Udara/blob/main/Skema.png)
@@ -33,5 +32,3 @@ Proyek ini dilisensikan di bawah [Lisensi MIT](LICENSE).
 
 ## Penulis
 Dibuat oleh [ANeMo](https://github.com/Anemo27)
-
->>>>>>> a0e279a7f4bdaa4d1c1806530066599e17bd5bc3
