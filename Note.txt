@@ -40,9 +40,21 @@
 7. SNTP (Simple Network Time Protocol)
    link: https://playground.arduino.cc/Code/Time/
 
-WiFimanager mode blocking. jadi, selama pengaturan wifi berlangsung, pembacaan sensor tidak berjalan/ditunda.
+Air Quality Index : https://www.aqi.in/blog/indoor-air-quality-parameters/
 
-Urutan Konfigurasi:
-- alat hidup
-- cek koneksi WiFi
-- cek koneksi NTP
+Tingkatan Kulaitas Udara:
+PM2.5:
+< 11 : Clean
+12-34 : Health
+35-54 : Unhealthy
+55-149 : Very Unhealthy
+150 > : Dangerous
+
+Gas Co
+< 4 : Clean
+4-8 : Health
+9-14 : Unhealthy
+15-30 : Very Unhealthy
+30 > : Dangerous
+
+Data yang diambil dari sensor berdasarkan penggunaan harian AC 8-10 jam perhari, penggunaan pada siang hari saja.
