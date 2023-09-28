@@ -396,7 +396,7 @@ void sendThingSpeak()
     ThingSpeak.setField(2, humi);
     ThingSpeak.setField(3, mq7Value);
     ThingSpeak.setField(4, concentrationPM25);
-    ThingSpeak.setField(5, particlePM25);
+    ThingSpeak.setField(5, (particlePM25 * 1000.0));
     ThingSpeak.setStatus(concenCOQuality);
 
     bool sentSuccessfully = false;
@@ -447,19 +447,19 @@ void setStatus()
     }
 
     // Particle PM2.5
-    if (particlePM25 < 12)
+    if ((particlePM25 * 1000.0) < 12)
     {
         particlePM25Quality = "Clean";
     }
-    else if (particlePM25 < 35)
+    else if ((particlePM25 * 1000.0) < 35)
     {
         particlePM25Quality = "Healthy";
     }
-    else if (particlePM25 < 55)
+    else if ((particlePM25 * 1000.0) < 55)
     {
         particlePM25Quality = "Unhealthy";
     }
-    else if (particlePM25 < 150)
+    else if ((particlePM25 * 1000.0) < 150)
     {
         particlePM25Quality = "Very Unhealthy";
     }
