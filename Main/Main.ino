@@ -70,21 +70,15 @@ AsyncTelegram2 myBot(tg_client);
 /*===== DSM501a =====*/
 String coQuality;
 String pm25Quality;
-unsigned long dsm_lowPulse = 0;
+unsigned long dsm_lowPulse = 0.0;
 
-float ratioPM25 = 0;
-float concentrationPM25 = 0;
-float particlePM25 = 0;
-
-// Inisialisasi variabel untuk EMA
-float emaConcentrationPM25 = 0.0; // Nilai awal EMA, bisa disesuaikan
-float emaparticlePM25 = 0.0;      // Nilai awal EMA, bisa disesuaikan
-float alpha = 0.2;                // Koefisien alpha, bisa disesuaikan (biasanya 0.1 - 0.3)
+float ratioPM25 = 0.0;
+float concentrationPM25 = 0.0;
+float particlePM25 = 0.0;
 /*===== DSM501a =====*/
 
 /*===== Additional global variabel =====*/
 unsigned long starttime;
-unsigned long endtime;
 unsigned long sampletime = 30 * 1000; // Smaple time 30s
 String message = "";
 String concenPM25Quality = "";
@@ -105,8 +99,8 @@ void loading(int max = 10)
 }
 void configureSPIFFS()
 {
-    Serial.print("Mounting file system");
-    loading(5);
+    Serial.println("Mounting file system");
+    // loading(5);
     // clean FS, for testing
     // SPIFFS.format();
 
@@ -123,7 +117,7 @@ void configureSPIFFS()
 }
 void configureWifiManager()
 {
-    Serial.print("Configure Wifi Manager");
+    Serial.println("Configure Wifi Manager");
 
     new (&custom_ts_channel) WiFiManagerParameter("ts_channel", "TS Channel", ts_channel, 10);
     new (&custom_ts_writeapi) WiFiManagerParameter("ts_writeapi", "TS WriteAPIKey", ts_writeapi, 20);
@@ -181,9 +175,9 @@ void configureTime()
 }
 void configureThingSpeak()
 {
-    Serial.print("Configure ThingSpeak");
+    Serial.println("Configure ThingSpeak");
     ThingSpeak.begin(ts_client); // Initialize ThingSpeak
-    loading();
+    // loading();
 }
 void configureTelegram()
 {
@@ -205,7 +199,7 @@ void configureTelegram()
 }
 void configureDSM501()
 {
-    Serial.print("Configure DSM501a");
+    Serial.println("Configure DSM501a");
     pinMode(DSM_PM25_PIN, INPUT); // Set DSM_PM25_PIN as input with pull-up resistor
 
     Serial.print("Warming up please wait.");
@@ -213,13 +207,13 @@ void configureDSM501()
 }
 void configureDHT22()
 {
-    Serial.print("Configure DHT22");
+    Serial.println("Configure DHT22");
     dht.begin();
-    loading();
+    // loading();
 }
 void configureMQ7()
 {
-    Serial.print("Configure MQ7 please wait.");
+    Serial.println("Configure MQ7 please wait.");
     // Set math model to calculate the PPM concentration and the value of constants
     MQ7.setRegressionMethod(1); //_PPM =  a*ratio^b
     MQ7.setA(99.042);
@@ -371,7 +365,7 @@ float getParticlemgm3(float ratio)
     // https://github.com/R2D2-2019/R2D2-2019/wiki/Is-the-given-formula-for-calculating-the-mg-m3-for-the-dust-sensor-dsm501a-correct%3F
 
     float mgm3 = 0.001915 * pow(ratio, 2) + 0.09522 * ratio - 0.04884;
-    return mgm3;
+    return mgm3 < 0.0 ? 0.0 : mgm3;
 }
 void telegramBot()
 {
@@ -396,7 +390,6 @@ void telegramBot()
         }
     }
 }
-
 void sendThingSpeak()
 {
     ThingSpeak.setField(1, tempC);
@@ -502,7 +495,8 @@ void setStatus()
     message += "\n_____________________________";
     message += "\nPM2.5 Particle Quality: " + particlePM25Quality;
     message += "\nCO Quality            : " + concenCOQuality;
-    message += "\nParticle PM2.5        : " + String(particlePM25) + " μg/m³";
+    message += "\nParticle PM2.5        : " + String(particlePM25) + " mg/m³";
+    message += "\nParticle PM2.5        : " + String(particlePM25 * 1000.0) + " μg/m³";
     message += "\nCarbon monoxide       : " + String(mq7Value) + " ppm";
     message += "\nTemperature           : " + String(tempC) + "°C";
     message += "\nHumidity              : " + String(humi) + "%";
@@ -511,13 +505,13 @@ void setStatus()
 }
 void alertSystem()
 {
-    if (particlePM25 >= 25 || mq7Value >= 9 && !alertOn)
+    if ((particlePM25 * 1000.0) >= 25 || mq7Value >= 9 && !alertOn)
     {
         alertOn = true;
         myBot.sendTo(atoll(tg_userid), "Udara dalam keadaan tidak sehat");
         myBot.sendTo(atoll(tg_userid), message);
     }
-    if (particlePM25 < 25 && mq7Value < 9 && alertOn)
+    if ((particlePM25 * 1000.0) < 25 && mq7Value < 9 && alertOn)
     {
         alertOn = false;
         myBot.sendTo(atoll(tg_userid), "Udara sudah kembali normal");
@@ -527,21 +521,17 @@ void alertSystem()
 /*===== Additional Function =====*/
 
 /*===== Read Sensor Function =====*/
-void readDSM501(unsigned long lowPulse = 0)
+void readDSM501(unsigned long lowPulse)
 {
-    ratioPM25 = (lowPulse - endtime + starttime + sampletime) / (sampletime * 10.0); // Integer percentage 0=>100
+    ratioPM25 = lowPulse / (sampletime * 10.0); // Integer percentage 0=>100
 
-    concentrationPM25 = 1.1 * pow(ratioPM25, 3) - 3.8 * pow(ratioPM25, 2) + 520 * ratioPM25 + 0.62; // using spec sheet curve
+    concentrationPM25 = 1.1 * pow(ratioPM25, 3) - 3.8 * pow(ratioPM25, 2) + 520 * ratioPM25; // using spec sheet curve
     particlePM25 = getParticlemgm3(ratioPM25);
-    dsm_lowPulse = 0;
+    dsm_lowPulse = 0.0;
 
     Serial.println("Ratio    : " + String(ratioPM25));
     Serial.println("LowPulse : " + String(lowPulse));
     Serial.println("Concent  : " + String(concentrationPM25));
-
-    // emaConcentrationPM25 = (alpha * concentrationPM25) + ((1 - alpha) * emaConcentrationPM25);
-    // emaparticlePM25 = (alpha * particlePM25) + ((1 - alpha) * emaparticlePM25);
-    // Serial.print("Smoothed Concentration PM2.5 : " + Strin(emaConcentrationPM25) + " ppm");
 }
 void readMq7()
 {
@@ -585,9 +575,13 @@ void loop()
     // cekWifiConnection();
     wifiManager.process();
     telegramBot();
-    dsm_lowPulse += pulseIn(DSM_PM25_PIN, LOW);
-    endtime = millis();
-    if ((endtime - starttime) > sampletime)
+    unsigned long lowPulsee = pulseIn(DSM_PM25_PIN, LOW);
+    dsm_lowPulse = dsm_lowPulse + lowPulsee;
+    Serial.println("===");
+    Serial.println(lowPulsee);
+    Serial.println(dsm_lowPulse);
+    Serial.println("===");
+    if ((millis() - starttime) > sampletime)
     {
         Serial.println("============================");
         readDSM501(dsm_lowPulse);

@@ -93,6 +93,7 @@ void loop()
     digitalWrite(LED_PIN, HIGH);
 
     dsm_lowPulse += pulseIn(DSM_PM25_PIN, LOW);
+    Serial.println(dsm_lowPulse);
 
     if ((millis() - starttime) > sampletime_ms)
     { // Check if we've sampled at least the defined sample time
@@ -106,25 +107,28 @@ void loop()
         // emaConcentrationPM25 = (alpha * concentrationPM25) + ((1 - alpha) * emaConcentrationPM25);
         // emaparticlePM25 = (alpha * particlePM25) + ((1 - alpha) * emaparticlePM25);
 
-        Serial.print("Air Quality         : ");
-        Serial.println(airQuality);
+        Serial.print("Low Pulse           : ");
+        Serial.println(dsm_lowPulse);
+        Serial.print("Sample              : ");
+        Serial.println(sampletime_ms);
+        Serial.print("Sample              : ");
+        Serial.println(sampletime_ms*10.0);
+        Serial.print("Ratio               : ");
+        Serial.println(ratioPM25);
 
-        Serial.print("Concentration PM2.5 : ");
-        Serial.print(concentrationPM25);
-        Serial.println(" ppm");
+        Serial.println("Air Quality         : " + String(airQuality));
+        Serial.println("Concentration PM2.5 : " + String(concentrationPM25) + " ppm");
 
         // Serial.print("Smoothed Concentration PM2.5 : ");
         // Serial.print(emaConcentrationPM25);
         // Serial.println(" ppm");
 
-        Serial.print("Particles PM2.5     : ");
-        Serial.print(particlePM25);
-        Serial.println(" μg/m³");
+        Serial.println("Particles PM2.5     : " + String(particlePM25) + " mg/m³");
+        Serial.println("Particles PM2.5     : " + String(particlePM25 * 1000.0) + " μg/m³");
 
         dsm_lowPulse = 0;
         starttime = millis();
         Serial.println("============================");
     }
     digitalWrite(LED_PIN, LOW);
-    delay(300);
 }
