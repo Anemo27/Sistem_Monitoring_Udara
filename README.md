@@ -37,5 +37,8 @@ Kami sangat menghargai kontribusi dari komunitas. Jika Anda ingin berkontribusi 
 Proyek ini dilisensikan di bawah [Lisensi MIT](LICENSE).
 
 ## Penulis
+<<<<<<< HEAD
 
+=======
+>>>>>>> 84066f32c9e92a952353c29994f85fdcb8f655ad
 Dibuat oleh [ANeMo](https://github.com/Anemo27)
